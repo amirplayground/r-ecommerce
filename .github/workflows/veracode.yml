@@ -31,7 +31,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [12.x, 14.x, 16.x]
+        node-version: [12.x] #[12.x, 14.x, 16.x]
 
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it and copies all sources into ZIP file for submitting for analysis. Replace this section with your applications build steps
@@ -47,6 +47,8 @@ jobs:
         #cache: 'npm'
 
     - run: npm install
+      working-directory: ./frontend
+    - run: npx browserslist@latest --update-db
       working-directory: ./frontend
     - run: npm run build --if-present
       working-directory: ./frontend
