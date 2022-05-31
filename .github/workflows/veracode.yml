@@ -47,11 +47,11 @@ jobs:
         #cache: 'npm'
 
     - run: npm install
-      working-directory: ./frontend
-    - run: npx browserslist@latest --update-db
-      working-directory: ./frontend
+      working-directory: ./backend
+    #- run: npx browserslist@latest --update-db
+      #working-directory: ./backend
     - run: npm run build --if-present
-      working-directory: ./frontend
+      working-directory: ./backend
     #- run: npm test
       #working-directory: ./frontend
 
@@ -61,7 +61,7 @@ jobs:
         #npm run build --if-present
         #npm run test --if-present
 
-    - run: zip -r veracode-scan-target-frontend.zip ./
+    - run: zip -r veracode-scan-target-backend.zip ./
 
     # download the Veracode Static Analysis Pipeline scan jar
     - run: curl --silent --show-error --fail -O https://downloads.veracode.com/securityscan/pipeline-scan-LATEST.zip
@@ -71,7 +71,7 @@ jobs:
       with:
         java-version: 8
         distribution: 'temurin'
-    - run: java -jar pipeline-scan.jar --veracode_api_id "${{secrets.VERACODE_API_ID}}" --veracode_api_key "${{secrets.VERACODE_API_KEY}}" --fail_on_severity="Very High, High" --file veracode-scan-target-frontend.zip
+    - run: java -jar pipeline-scan.jar --veracode_api_id "${{secrets.VERACODE_API_ID}}" --veracode_api_key "${{secrets.VERACODE_API_KEY}}" --fail_on_severity="Very High, High" --file veracode-scan-target-backend.zip
       continue-on-error: true
     - name: Convert pipeline scan output to SARIF format
       id: convert
