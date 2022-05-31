@@ -28,26 +28,38 @@ jobs:
       contents: read # for actions/checkout to fetch code
       security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
     runs-on: ubuntu-latest
-    steps:
 
+    strategy:
+      matrix:
+        node-version: [12.x, 14.x, 16.x]
+
+    steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it and copies all sources into ZIP file for submitting for analysis. Replace this section with your applications build steps
     - uses: actions/checkout@v3
       with:
+        #path: frontend
         repository: ''
 
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: ${{ secrets.NODE_VERSION }}
-        cache: 'npm'
+        node-version: ${{ matrix.node-version }}
+        #cache: 'npm'
 
-    - name: npm install, build, and test
-      run: |
-        npm install
-        npm run build --if-present
-        npm run test --if-present
+    - run: npm install
+      working-directory: ./frontend
+    - run: npm run build --if-present
+      working-directory: ./frontend
+    - run: npm run test --if-present
+      working-directory: ./frontend
 
-    - run: zip -r veracode-scan-target.zip ./
+    #- name: npm install, build, and test
+      #run: |
+        #npm install
+        #npm run build --if-present
+        #npm run test --if-present
+
+    - run: zip -r veracode-scan-target-frontend.zip ./
 
     # download the Veracode Static Analysis Pipeline scan jar
     - run: curl --silent --show-error --fail -O https://downloads.veracode.com/securityscan/pipeline-scan-LATEST.zip
@@ -57,7 +69,7 @@ jobs:
       with:
         java-version: 8
         distribution: 'temurin'
-    - run: java -jar pipeline-scan.jar --veracode_api_id "${{secrets.VERACODE_API_ID}}" --veracode_api_key "${{secrets.VERACODE_API_KEY}}" --fail_on_severity="Very High, High" --file veracode-scan-target.zip
+    - run: java -jar pipeline-scan.jar --veracode_api_id "${{secrets.VERACODE_API_ID}}" --veracode_api_key "${{secrets.VERACODE_API_KEY}}" --fail_on_severity="Very High, High" --file veracode-scan-target-frontend.zip
       continue-on-error: true
     - name: Convert pipeline scan output to SARIF format
       id: convert
